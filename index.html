@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PacMan Proyect</title>
+</head>
+<style>
+    canvas {
+        background-color: #036684;
+    }
+    body {
+        background-color: rgb(24, 26, 27);
+    }
+</style>
+<body>
+
+<canvas id="canvas" width="1000" height="700"></canvas>
+
+<script>
+    class Player {
+        constructor(ctx, x, y, width, height, speed) {
+            this.ctx = ctx;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.speed = speed;
+            this.movement = "";
+        }
+
+        randomRgbColor() {
+            let r = Math.floor(Math.random() * 256);
+            let g = Math.floor(Math.random() * 256);
+            let b = Math.floor(Math.random() * 256);
+            return `rgba(${r},${g},${b})`;
+        }
+
+        draw(color) {
+            ctx.drawImage(PlayerIcon, this.x,this.y,this.width,this.height);
+        }
+
+        move(direction) {
+            this.movement = direction;
+        }
+
+        update(cw, ch, food, obstacles) {
+            const color = this.randomRgbColor();
+            this.draw(color);
+
+            switch (this.movement) {
+                case "up":
+                    this.y -= this.speed;
+                    if (this.y < 0) {
+                        this.y = ch;
+                    }
+                    break;
+                case "down":
+                    this.y += this.speed;
+                    if (this.y > ch) {
+                        this.y = -this.height;
+                    }
+                    break;
+                case "left":
+                    this.x -= this.speed;
+                    if (this.x < 0) {
+                        this.x = cw;
+                    }
+                    break;
+                case "right":
+                    this.x += this.speed;
+                    if (this.x > cw) {
+                        this.x = -this.width;
+                    }
+                    break;
+            }
+
+            if (this.x < food.x + food.width && this.x + this.width > food.x && this.y < food.y + food.height && this.y + this.height > food.y) {
+                do {
+                    score += 5;
+                    food.updatePosition(cw, ch);
+                } while (food.checkCollision(obstacles));
+            }
+
+            for (const obstacle of obstacles) {
+                if (this.checkCollision(obstacle)) {
+                    if (this.movement === "up" || this.movement === "down") {
+                        this.y = this.movement === "up" ? obstacle.y + obstacle.height : obstacle.y - 50;
+                    }
+                    if (this.movement === "left" || this.movement === "right") {
+                        this.x = this.movement === "left" ? obstacle.x + obstacle.width : obstacle.x - 50;
+                    }
+                    this.movement = "";
+                }
+            }
+        }
+
+        checkCollision(object) {
+            return (
+                this.x < object.x + object.width &&
+                this.x + this.width > object.x &&
+                this.y < object.y + object.height &&
+                this.y + this.height > object.y
+            );
+        }
+    }
+
+    class Food {
+        constructor(ctx, x, y, width, height) {
+            this.ctx = ctx;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.eaten = false;
+        }
+
+        draw(color) {
+            if (!this.eaten) {
+                this.ctx.fillStyle = "yellow";
+                this.ctx.fillRect(this.x, this.y, this.width, this.height);
+                this.ctx.strokeRect(this.x, this.y, this.width, this.height);
+            }
+           
+        }
+        
+
+        checkCollision(object) {
+            return (
+                this.x < object.x + object.width &&
+                this.x + this.width > object.x &&
+                this.y < object.y + object.height &&
+                this.y + this.height > object.y
+            );
+        }
+    }
+
+    class Obstacle {
+        constructor(ctx, x, y, width, height, color) {
+            this.ctx = ctx;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.color = color;
+        }
+
+        draw() {
+            this.ctx.fillStyle = this.color;
+            this.ctx.fillRect(this.x, this.y, this.width, this.height);
+            this.ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+    }
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const cw = 1000, ch = 700;
+    let score = 0; //Max 3930
+    let paused = false;
+    let foodEating =0; //Max 785
+
+    const player = new Player(ctx, 275, 275,50,50, 5);
+    let PlayerIcon = new Image();
+    PlayerIcon.src = "../src/Axo.PNG";
+
+    const foods = [];
+
+    const foodSpacing = 5
+    const foodWidth = 15;
+    const foodHeight = 15;
+
+
+    const obstacles = [
+
+        new Obstacle(ctx, 0, 0, 30, 300, "#036684"),
+        new Obstacle(ctx, cw-25, 0, 30, 300, "#036684"),
+        new Obstacle(ctx, 0, 400, 30, 300, "#036684"),
+        new Obstacle(ctx, cw-25, 400, 30, 300, "#036684"),
+
+
+        new Obstacle(ctx, 30, 15, 945, 20, "blue"),
+        new Obstacle(ctx, 30, ch-25, 945, 20, "blue"),
+
+        new Obstacle(ctx, 20, 15, 20, 290, "blue"),
+        new Obstacle(ctx, cw-45, 5, 20, 300, "blue"),
+        
+        new Obstacle(ctx, 20, 400, 20, 295, "blue"),
+        new Obstacle(ctx, cw-45, 400, 20, 295, "blue"),
+
+        new Obstacle(ctx, -10, 285, 50, 20, "blue"),
+        new Obstacle(ctx, cw-45, 285, 50, 20, "blue"),
+
+        new Obstacle(ctx, -10, 400, 50, 20, "blue"),
+        new Obstacle(ctx, cw-45, 400, 50, 20, "blue"),
+
+
+        new Obstacle(ctx, 125, 115, 330, 20, "blue"),
+        new Obstacle(ctx, cw-450, 115, 330, 20, "blue"),
+
+        new Obstacle(ctx, 125, 580, 330, 20, "blue"),
+        new Obstacle(ctx, cw-450, 580, 330, 20, "blue"),
+        
+
+        new Obstacle(ctx, 125, 205, 20, 295, "blue"),
+        new Obstacle(ctx, cw-140, 205, 20, 295, "blue"),
+
+        new Obstacle(ctx, 230, 215, 545, 20, "blue"),
+        new Obstacle(ctx, 230, ch-220, 545, 20, "blue"),
+
+        new Obstacle(ctx, 125, 332, 200, 40, "blue"),
+        new Obstacle(ctx, cw-320, 332, 200, 40, "blue"),
+
+        new Obstacle(ctx, 405, 305, 20, 100, "blue"),
+        new Obstacle(ctx, cw-415, 305, 20, 100, "blue"),
+
+        new Obstacle(ctx, 405, 385, 200, 20, "blue"),
+        
+    ];
+
+    for (let x = foodWidth; x < cw; x += (foodWidth * 2 + foodSpacing)) {
+        for (let y = foodHeight; y < ch; y += (foodHeight * 2 + foodSpacing)) {
+            let foodOverlapsObstacle = false;
+            let foodOverlapsPlayer = false;
+            
+            
+            for (const obstacle of obstacles) {
+                if (
+                    x < obstacle.x + obstacle.width &&
+                    x + foodWidth > obstacle.x &&
+                    y < obstacle.y + obstacle.height &&
+                    y + foodHeight > obstacle.y
+                ) {
+                    foodOverlapsObstacle = true;
+                    break; 
+                }
+            }
+            
+            if (
+                x < player.x + player.width &&
+                x + foodWidth > player.x &&
+                y < player.y + player.height &&
+                y + foodHeight > player.y
+            ) {
+                foodOverlapsPlayer = true;
+            }
+            
+            if (!foodOverlapsObstacle && !foodOverlapsPlayer) {
+                foods.push(new Food(ctx, x, y, foodWidth, foodHeight));
+            }
+        }
+    }
+
+
+
+    window.requestAnimationFrame = (function () {
+        return window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            function (callback) {
+                window.setTimeout(callback, 30);
+            };
+    }());
+
+    document.addEventListener("keydown", (event) => {
+        switch (event.keyCode) {
+            case 87:
+                player.move("up");
+                break;
+            case 83:
+                player.move("down");
+                break;
+            case 65:
+                player.move("left");
+                break;
+            case 68:
+                player.move("right");
+                break;
+            case 32:
+                player.speed += 5;
+                break;
+            case 77:
+            player.speed -=5;
+                break;
+            case 80:
+            paused = !paused;
+            if (paused) {
+                ctx.fillStyle="rgba(184, 184, 184,0.5)";
+                ctx.fillRect(0,0,1000,700);
+                ctx.font = "35px Impact";
+                ctx.fillStyle = "black"; 
+                ctx.fillText("¡Paused!", 425,300); 
+                ctx.fillText("Press (P) to continue",350,360);
+                 
+            } else {
+
+                requestAnimationFrame(update);
+            }
+                break;
+        }
+    });
+
+    function draw() {
+
+        for (const obstacle of obstacles) {
+            obstacle.draw();
+        }
+
+        for (const food of foods) {
+            food.draw();
+
+            if (!food.eaten && player.checkCollision(food)) {
+                food.eaten = true;
+                foodEating +=1;
+                score += 5;
+            }
+        }
+
+        ctx.lineWidth = 2;
+        ctx.font = "35px Impact";
+        ctx.fillStyle = "#ffffff"; 
+        ctx.fillText("Score: " + score, 440, 40); 
+        ctx.fillText("P: Paused", 80, 690); 
+        ctx.fillText("Space: +speed", 720, 690); 
+        ctx.fillStyle = "#000000";
+        ctx.strokeText("Score: " + score, 440, 40); 
+        ctx.strokeText("P: Paused", 80, 690); 
+        ctx.strokeText("Space: +speed", 720, 690); 
+
+    }
+
+    function update() {
+       
+        if (!paused) {
+            ctx.clearRect(0, 0, cw, ch);
+            let collisionDetected = false;
+
+            if (
+                !collisionDetected &&
+                player.x < foods.x + 30 &&
+                player.x + 50 > food.x &&
+                player.y < food.y + 30 &&
+                player.y + 50 > food.y
+            ) {
+                score += 5;
+                food.updatePosition(cw, ch);
+                collisionDetected = true;
+            }
+            player.update(cw, ch, foods, obstacles);
+            draw();
+            requestAnimationFrame(update);
+        }
+    }
+
+    update();
+
+    function randomInteger(max) {
+        return Math.floor(Math.random() * (max + 1));
+    }
+
+    
+</script>
+
+</body>
+</html>
