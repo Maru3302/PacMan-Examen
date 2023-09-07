@@ -305,6 +305,7 @@
     const cw = 1000, ch = 700;
     let score = 0; //Max 3930
     let paused = false;
+    let pausedSpeed = 0;
     let foodEating =0; //Max 785
     let gameIsOver = false;
     
@@ -441,30 +442,31 @@
             case 68:
                 player.move("right");
                 break;
-            case 32:
-                player.speed += 5;
-                break;
-            case 77:
-            player.speed -=5;
-                break;
             case 80:
-            paused = !paused;
-            if (paused) {
-                ctx.fillStyle="rgba(184, 184, 184,0.5)";
-                ctx.fillRect(0,0,1000,700);
-                ctx.font = "35px Impact";
-                ctx.fillStyle = "black"; 
-                ctx.fillText("¡Paused!", 425,300); 
-                ctx.fillText("Press (P) to continue",350,360);
-                 
-            } else {
-
-                requestAnimationFrame(update);
-            }
+            PauseAll();
                 break;
+
         }
     });
 
+    function PauseAll() {
+        paused = !paused;
+        if (paused) {
+            pausedSpeed = player.speed;
+            player.speed = 0;
+            for (const enemy of enemies) {
+                enemy.pausedSpeed = enemy.speed;
+                enemy.speed = 0;
+            }
+        
+        } else {
+            
+            player.speed = pausedSpeed;
+            for (const enemy of enemies) {
+                enemy.speed = enemy.pausedSpeed;
+            }
+        }
+    }
     function draw() {
 
         for (const obstacle of obstacles) {
@@ -498,6 +500,15 @@
                 }
             });
         }
+
+        if (paused) {
+            ctx.fillStyle = "rgba(184, 184, 184,0.5)";
+            ctx.fillRect(0, 0, 1000, 700);
+            ctx.font = "35px Impact";
+            ctx.fillStyle = "black";
+            ctx.fillText("¡Paused!", 425, 300);
+            ctx.fillText("Press (P) to continue", 350, 360);
+        }
         
         ctx.lineWidth = 2;
         ctx.font = "35px Impact";
@@ -520,7 +531,6 @@
     }
 
     function update() {
-       
         if (!paused) {
             ctx.clearRect(0, 0, cw, ch);
             let collisionDetected = false;
@@ -541,14 +551,14 @@
                     gameIsOver = true;
                 }
             }
-
-        }
             updateEnemies();
-            player.update(cw, ch, foods, obstacles);
-            draw();
-            requestAnimationFrame(update);
-        
-    }
+        }
+
+    player.update(cw, ch, foods, obstacles);
+    draw();
+    requestAnimationFrame(update); // Move this line outside of the condition
+}
+
 
     update();
 
