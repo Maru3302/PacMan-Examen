@@ -7,7 +7,7 @@
 </head>
 <style>
     canvas {
-        background-color: #036684;
+        background-color: #ebdbc0;
     }
     body {
         background-color: rgb(24, 26, 27);
@@ -28,16 +28,25 @@
             this.speed = speed;
             this.movement = "";
         }
+        draw(direction) {
 
-        randomRgbColor() {
-            let r = Math.floor(Math.random() * 256);
-            let g = Math.floor(Math.random() * 256);
-            let b = Math.floor(Math.random() * 256);
-            return `rgba(${r},${g},${b})`;
-        }
-
-        draw(color) {
-            ctx.drawImage(PlayerIcon, this.x,this.y,this.width,this.height);
+            switch (this.movement) {
+                case "up":
+                    ctx.drawImage(PlayerUp, this.x,this.y,this.width,this.height);
+                    break;
+                case "down":
+                    ctx.drawImage(PlayerDown, this.x,this.y,this.width,this.height);
+                    break;
+                case "left":
+                    ctx.drawImage(PlayerLeft, this.x,this.y,this.width,this.height);
+                    break;
+                case "right":
+                    ctx.drawImage(PlayerRight, this.x,this.y,this.width,this.height);
+                    break;
+                default:
+                ctx.drawImage(PlayerDefault, this.x,this.y,this.width,this.height);
+                    break;
+            }
         }
 
         move(direction) {
@@ -45,8 +54,7 @@
         }
 
         update(cw, ch, food, obstacles) {
-            const color = this.randomRgbColor();
-            this.draw(color);
+            this.draw();
 
             switch (this.movement) {
                 case "up":
@@ -151,71 +159,231 @@
             this.ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
     }
+    
+    class Enemy {
+    constructor(ctx, width, height, speed, player, obstacles) {
+        this.ctx = ctx;
+        this.width = width;
+        this.height = height;
+        this.speed = speed;
+        this.player = player;
+        this.obstacles = obstacles;
+        this.x = 0;
+        this.y = 0;
+        this.direction = this.randomDirection(); 
+        this.spawnRandomPosition();
+    }
+
+    draw() {
+        ctx.drawImage(EnemysIcon, this.x,this.y,this.width,this.height);
+    }
+
+    spawnRandomPosition() {
+        let validPosition = false;
+        
+        while (!validPosition) {
+            const randomX = randomInteger(cw - this.width);
+            const randomY = randomInteger(ch - this.height);
+            
+        
+            const collidesWithObstacle = this.obstacles.some(obstacle => {
+                return (
+                    randomX < obstacle.x + obstacle.width &&
+                    randomX + this.width > obstacle.x &&
+                    randomY < obstacle.y + obstacle.height &&
+                    randomY + this.height > obstacle.y
+                );
+            });
+            
+            if (!collidesWithObstacle) {
+                this.x = randomX;
+                this.y = randomY;
+                validPosition = true;
+            }
+        }
+    }
+
+    isTooCloseToPlayer() {
+        const distance = Math.sqrt(
+            Math.pow(this.x - this.player.x, 2) + Math.pow(this.y - this.player.y, 2)
+        );
+        return distance < 100;
+    }
+
+    randomDirection() {
+        const directions = ["up", "down", "left", "right"];
+        return directions[Math.floor(Math.random() * directions.length)];
+    }
+
+    move() {
+        
+        switch (this.direction) {
+            case "up":
+                this.y -= this.speed;
+                break;
+            case "down":
+                this.y += this.speed;
+                break;
+            case "left":
+                this.x -= this.speed;
+                break;
+            case "right":
+                this.x += this.speed;
+                break;
+        }
+        if (this.checkCollision(this.obstacles)) {
+            this.x -= this.speed;
+            this.randomDirection();
+        }
+       
+        this.avoidObstacles();
+    }
+
+    avoidObstacles() {
+       
+        let nextX = this.x;
+        let nextY = this.y;
+
+        switch (this.direction) {
+            case "up":
+                nextY -= this.speed;
+                break;
+            case "down":
+                nextY += this.speed;
+                break;
+            case "left":
+                nextX -= this.speed;
+                break;
+            case "right":
+                nextX += this.speed;
+                break;
+        }
+
+        let canMove = true;
+
+       
+        for (const obstacle of this.obstacles) {
+            if (
+                nextX < obstacle.x + obstacle.width &&
+                nextX + this.width > obstacle.x &&
+                nextY < obstacle.y + obstacle.height &&
+                nextY + this.height > obstacle.y
+            ) {
+                canMove = false;
+                break;
+            }
+        }
+
+        if (!canMove) {
+            
+            this.direction = this.randomDirection();
+        }
+    }
+
+    checkCollision(object) {
+        return (
+            this.x < object.x + object.width &&
+            this.x + this.width > object.x &&
+            this.y < object.y + object.height &&
+            this.y + this.height > object.y
+        );
+    }
+    checkCollisionWithOtherEnemies(enemies) {
+        for (const enemy of enemies) {
+            if (enemy !== this && this.checkCollision(enemy)) {
+                this.direction = this.randomDirection();
+                break;
+            }
+        }
+    }
+}
+
 
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
+
     const cw = 1000, ch = 700;
     let score = 0; //Max 3930
     let paused = false;
     let foodEating =0; //Max 785
-
+    let gameIsOver = false;
+    
     const player = new Player(ctx, 275, 275,50,50, 5);
-    let PlayerIcon = new Image();
-    PlayerIcon.src = "../src/Axo.PNG";
+    let PlayerUp= new Image();
+    PlayerUp.src = "../src/Mouse-up.PNG";
+    let PlayerDown= new Image();
+    PlayerDown.src = "../src/Mouse-down.PNG";
+    let PlayerLeft= new Image();
+    PlayerLeft.src = "../src/Mouse-left.PNG";
+    let PlayerRight= new Image();
+    PlayerRight.src = "../src/Mouse-right.PNG";
+    let PlayerDefault= new Image();
+    PlayerDefault.src = "../src/Mouse-default.PNG";
+    
 
     const foods = [];
-
     const foodSpacing = 5
     const foodWidth = 15;
     const foodHeight = 15;
 
+    let EnemysIcon = new Image();
+    EnemysIcon.src = "../src/Kitty-enemy.png";
+
 
     const obstacles = [
 
-        new Obstacle(ctx, 0, 0, 30, 300, "#036684"),
-        new Obstacle(ctx, cw-25, 0, 30, 300, "#036684"),
-        new Obstacle(ctx, 0, 400, 30, 300, "#036684"),
-        new Obstacle(ctx, cw-25, 400, 30, 300, "#036684"),
+        new Obstacle(ctx, 0, 0, 30, 300, "#ebdbc0"),
+        new Obstacle(ctx, cw-25, 0, 30, 300, "#ebdbc0"),
+        new Obstacle(ctx, 0, 400, 30, 300, "#ebdbc0"),
+        new Obstacle(ctx, cw-25, 400, 30, 300, "#ebdbc0"),
 
 
-        new Obstacle(ctx, 30, 15, 945, 20, "blue"),
-        new Obstacle(ctx, 30, ch-25, 945, 20, "blue"),
+        new Obstacle(ctx, 30, 15, 945, 20, "#8b501f"),
+        new Obstacle(ctx, 30, ch-25, 945, 20, "#8b501f"),
 
-        new Obstacle(ctx, 20, 15, 20, 290, "blue"),
-        new Obstacle(ctx, cw-45, 5, 20, 300, "blue"),
+        new Obstacle(ctx, 20, 15, 20, 290, "#8b501f"),
+        new Obstacle(ctx, cw-45, 5, 20, 300, "#8b501f"),
         
-        new Obstacle(ctx, 20, 400, 20, 295, "blue"),
-        new Obstacle(ctx, cw-45, 400, 20, 295, "blue"),
+        new Obstacle(ctx, 20, 400, 20, 295, "#8b501f"),
+        new Obstacle(ctx, cw-45, 400, 20, 295, "#8b501f"),
 
-        new Obstacle(ctx, -10, 285, 50, 20, "blue"),
-        new Obstacle(ctx, cw-45, 285, 50, 20, "blue"),
+        new Obstacle(ctx, -10, 285, 50, 20, "#8b501f"),
+        new Obstacle(ctx, cw-45, 285, 50, 20, "#8b501f"),
 
-        new Obstacle(ctx, -10, 400, 50, 20, "blue"),
-        new Obstacle(ctx, cw-45, 400, 50, 20, "blue"),
+        new Obstacle(ctx, -10, 400, 50, 20, "#8b501f"),
+        new Obstacle(ctx, cw-45, 400, 50, 20, "#8b501f"),
 
 
-        new Obstacle(ctx, 125, 115, 330, 20, "blue"),
-        new Obstacle(ctx, cw-450, 115, 330, 20, "blue"),
+        new Obstacle(ctx, 125, 115, 330, 20, "#8b501f"),
+        new Obstacle(ctx, cw-450, 115, 330, 20, "#8b501f"),
 
-        new Obstacle(ctx, 125, 580, 330, 20, "blue"),
-        new Obstacle(ctx, cw-450, 580, 330, 20, "blue"),
+        new Obstacle(ctx, 125, 580, 330, 20, "#8b501f"),
+        new Obstacle(ctx, cw-450, 580, 330, 20, "#8b501f"),
         
 
-        new Obstacle(ctx, 125, 205, 20, 295, "blue"),
-        new Obstacle(ctx, cw-140, 205, 20, 295, "blue"),
+        new Obstacle(ctx, 125, 205, 20, 295, "#8b501f"),
+        new Obstacle(ctx, cw-140, 205, 20, 295, "#8b501f"),
 
-        new Obstacle(ctx, 230, 215, 545, 20, "blue"),
-        new Obstacle(ctx, 230, ch-220, 545, 20, "blue"),
+        new Obstacle(ctx, 230, 215, 545, 20, "#8b501f"),
+        new Obstacle(ctx, 230, ch-220, 545, 20, "#8b501f"),
 
-        new Obstacle(ctx, 125, 332, 200, 40, "blue"),
-        new Obstacle(ctx, cw-320, 332, 200, 40, "blue"),
+        new Obstacle(ctx, 125, 332, 200, 40, "#8b501f"),
+        new Obstacle(ctx, cw-320, 332, 200, 40, "#8b501f"),
 
-        new Obstacle(ctx, 405, 305, 20, 100, "blue"),
-        new Obstacle(ctx, cw-415, 305, 20, 100, "blue"),
+        new Obstacle(ctx, 405, 305, 20, 100, "#8b501f"),
+        new Obstacle(ctx, cw-415, 305, 20, 100, "#8b501f"),
 
-        new Obstacle(ctx, 405, 385, 200, 20, "blue"),
+        new Obstacle(ctx, 405, 385, 200, 20, "#8b501f"),
         
     ];
+
+    const enemies = [];
+    const numEnemies = 5;
+
+    for (let i = 0; i < numEnemies; i++) {
+        const enemy = new Enemy(ctx, 50, 50, 3, player, obstacles);
+        enemies.push(enemy);
+    }
 
     for (let x = foodWidth; x < cw; x += (foodWidth * 2 + foodSpacing)) {
         for (let y = foodHeight; y < ch; y += (foodHeight * 2 + foodSpacing)) {
@@ -249,8 +417,6 @@
             }
         }
     }
-
-
 
     window.requestAnimationFrame = (function () {
         return window.requestAnimationFrame ||
@@ -314,7 +480,25 @@
                 score += 5;
             }
         }
+        for (const enemy of enemies) {
+            enemy.draw(); 
+        }
 
+        if (gameIsOver === true) {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.font = "35px Impact";
+            ctx.fillStyle = "white";
+            ctx.fillText("GAME OVER!", 425, 300);
+            ctx.fillText("Press (R) to Reload", 370, 360);
+
+            document.addEventListener("keydown", (event) => {
+                if (event.keyCode === 82) { 
+                    location.reload();
+                }
+            });
+        }
+        
         ctx.lineWidth = 2;
         ctx.font = "35px Impact";
         ctx.fillStyle = "#ffffff"; 
@@ -326,6 +510,13 @@
         ctx.strokeText("P: Paused", 80, 690); 
         ctx.strokeText("Space: +speed", 720, 690); 
 
+    }
+
+    function updateEnemies() {
+        for (const enemy of enemies) {
+            enemy.checkCollisionWithOtherEnemies(enemies);
+            enemy.move();
+        }
     }
 
     function update() {
@@ -345,10 +536,18 @@
                 food.updatePosition(cw, ch);
                 collisionDetected = true;
             }
+            for (const enemy of enemies) {
+                if (player.checkCollision(enemy)) {
+                    gameIsOver = true;
+                }
+            }
+
+        }
+            updateEnemies();
             player.update(cw, ch, foods, obstacles);
             draw();
             requestAnimationFrame(update);
-        }
+        
     }
 
     update();
@@ -357,7 +556,6 @@
         return Math.floor(Math.random() * (max + 1));
     }
 
-    
 </script>
 
 </body>
