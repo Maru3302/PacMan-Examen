@@ -192,21 +192,29 @@
                 const randomX = randomInteger(cw - this.width);
                 const randomY = randomInteger(ch - this.height);
                 
-            
-                const collidesWithObstacle = this.obstacles.some(obstacle => {
-                    return (
-                        randomX < obstacle.x + obstacle.width &&
-                        randomX + this.width > obstacle.x &&
-                        randomY < obstacle.y + obstacle.height &&
-                        randomY + this.height > obstacle.y
-                    );
-                });
-                
-                if (!collidesWithObstacle) {
-                    this.x = randomX;
-                    this.y = randomY;
-                    validPosition = true;
+                const distance = Math.sqrt(
+                    Math.pow(randomX - this.player.x, 2) + Math.pow(randomY - this.player.y, 2)
+                );
+
+                if(distance >100 ){
+                    
+                    const collidesWithObstacle = this.obstacles.some(obstacle => {
+                        return (
+                            randomX < obstacle.x + obstacle.width &&
+                            randomX + this.width > obstacle.x &&
+                            randomY < obstacle.y + obstacle.height &&
+                            randomY + this.height > obstacle.y
+                        );
+                    });
+                    
+                    if (!collidesWithObstacle) {
+                        this.x = randomX;
+                        this.y = randomY;
+                        validPosition = true;
+                    }
+                    
                 }
+                
             }
         }
 
@@ -315,7 +323,7 @@
     let score = 0; 
     let paused = false;
     let pausedSpeed = 0;
-    let foodEating =0; //Max 353 to win
+    let foodEating = 100; //Max 353 to win
     let gameIsOver = false;
     
     const player = new Player(ctx, 275, 275,50,50, 5);
@@ -334,7 +342,10 @@
     Winner.src= "src/Win-rat.png";
 
     let Control = new Image();
-    Control.src = "src/Control.png";
+    Control.src = "src/control.png";
+
+    let ControlPaused = new Image();
+    ControlPaused.src = "src/control-pause.png";
     
     const foods = [];
     const foodSpacing = 5
@@ -456,7 +467,7 @@
                 player.move("right");
                 break;
             case 80:
-            PauseAll();
+                PauseAll();
                 break;
 
         }
@@ -534,6 +545,7 @@
             ctx.fillText("Press (P) to continue", 350, 360);
         }
         if(foodEating >= 353){
+            scoreGameOver();
             player.move("");
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, cw, ch);
@@ -543,7 +555,13 @@
             ctx.fillText("Press (R) to Reload", 200, 360);
             ctx.fillText("Score: " + score, 200, 430);
             ctx.fillText("Quesitos Comidos: " + foodEating, 200, 490);
-            ctx.drawImage(Winner, 500,200,350,350);
+            ctx.drawImage(Winner, 520,200,350,350);
+
+            document.addEventListener("keydown", (event) => {
+                if (event.keyCode === 82) { 
+                    location.reload();
+                }
+            });
         }
     }
 
@@ -600,6 +618,8 @@
         infoCtx.fillText(foodEating, 20, 140);
         infoCtx.fillText("Instrucciones:",20,190);
         infoCtx.drawImage(Control, 40,220, 161, 140);
+        infoCtx.drawImage(ControlPaused, 20, 360, 40, 40);
+        infoCtx.fillText("Pusar",80,390);
     }
     function scoreGameOver(){
         infoCtx.fillStyle = "black";
