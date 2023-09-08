@@ -332,6 +332,9 @@
 
     let Winner = new Image();
     Winner.src= "src/Win-rat.png";
+
+    let Control = new Image();
+    Control.src = "src/Control.png";
     
     const foods = [];
     const foodSpacing = 5
@@ -596,6 +599,7 @@
         infoCtx.fillText("Quesitos comidos:", 20, 110);
         infoCtx.fillText(foodEating, 20, 140);
         infoCtx.fillText("Instrucciones:",20,190);
+        infoCtx.drawImage(Control, 40,220, 161, 140);
     }
     function scoreGameOver(){
         infoCtx.fillStyle = "black";
