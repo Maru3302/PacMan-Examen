@@ -468,24 +468,28 @@
         }
     }
     function draw() {
+        
+        ctx.clearRect(0, 0, cw, ch);
 
-        for (const obstacle of obstacles) {
-            obstacle.draw();
-        }
-
-        for (const food of foods) {
-            food.draw();
+       for (const food of foods) {
+        food.draw();
 
             if (!food.eaten && player.checkCollision(food)) {
                 food.eaten = true;
-                foodEating +=1;
+                foodEating += 1;
                 score += 5;
             }
         }
+    
+        player.draw();
         for (const enemy of enemies) {
-            enemy.draw(); 
+            enemy.draw();
         }
-
+    
+        for (const obstacle of obstacles) {
+            obstacle.draw();
+        }
+        
         if (gameIsOver === true) {
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, cw, ch);
