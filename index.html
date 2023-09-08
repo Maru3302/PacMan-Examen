@@ -13,10 +13,16 @@
     body {
         background-color: rgb(24, 26, 27);
     }
+    #contenedor {
+        display: flex;
+    }
 </style>
 <body>
 
-<canvas id="canvas" width="1000" height="700"></canvas>
+    <div>
+        <canvas id="canvas" width="1000" height="700"></canvas>
+        <canvas id="infoCanvas" width="250" height="700"></canvas>
+    </div>
 
 <script>
     class Player {
@@ -162,143 +168,145 @@
     }
     
     class Enemy {
-    constructor(ctx, width, height, speed, player, obstacles) {
-        this.ctx = ctx;
-        this.width = width;
-        this.height = height;
-        this.speed = speed;
-        this.player = player;
-        this.obstacles = obstacles;
-        this.x = 0;
-        this.y = 0;
-        this.direction = this.randomDirection(); 
-        this.spawnRandomPosition();
-    }
+        constructor(ctx, width, height, speed, player, obstacles) {
+            this.ctx = ctx;
+            this.width = width;
+            this.height = height;
+            this.speed = speed;
+            this.player = player;
+            this.obstacles = obstacles;
+            this.x = 0;
+            this.y = 0;
+            this.direction = this.randomDirection(); 
+            this.spawnRandomPosition();
+        }
 
-    draw() {
-        ctx.drawImage(EnemysIcon, this.x,this.y,this.width,this.height);
-    }
+        draw() {
+            ctx.drawImage(EnemysIcon, this.x,this.y,this.width,this.height);
+        }
 
-    spawnRandomPosition() {
-        let validPosition = false;
-        
-        while (!validPosition) {
-            const randomX = randomInteger(cw - this.width);
-            const randomY = randomInteger(ch - this.height);
+        spawnRandomPosition() {
+            let validPosition = false;
             
-        
-            const collidesWithObstacle = this.obstacles.some(obstacle => {
-                return (
-                    randomX < obstacle.x + obstacle.width &&
-                    randomX + this.width > obstacle.x &&
-                    randomY < obstacle.y + obstacle.height &&
-                    randomY + this.height > obstacle.y
-                );
-            });
+            while (!validPosition) {
+                const randomX = randomInteger(cw - this.width);
+                const randomY = randomInteger(ch - this.height);
+                
             
-            if (!collidesWithObstacle) {
-                this.x = randomX;
-                this.y = randomY;
-                validPosition = true;
+                const collidesWithObstacle = this.obstacles.some(obstacle => {
+                    return (
+                        randomX < obstacle.x + obstacle.width &&
+                        randomX + this.width > obstacle.x &&
+                        randomY < obstacle.y + obstacle.height &&
+                        randomY + this.height > obstacle.y
+                    );
+                });
+                
+                if (!collidesWithObstacle) {
+                    this.x = randomX;
+                    this.y = randomY;
+                    validPosition = true;
+                }
             }
         }
-    }
 
-    isTooCloseToPlayer() {
-        const distance = Math.sqrt(
-            Math.pow(this.x - this.player.x, 2) + Math.pow(this.y - this.player.y, 2)
-        );
-        return distance < 100;
-    }
+        isTooCloseToPlayer() {
+            const distance = Math.sqrt(
+                Math.pow(this.x - this.player.x, 2) + Math.pow(this.y - this.player.y, 2)
+            );
+            return distance < 100;
+        }
 
-    randomDirection() {
-        const directions = ["up", "down", "left", "right"];
-        return directions[Math.floor(Math.random() * directions.length)];
-    }
+        randomDirection() {
+            const directions = ["up", "down", "left", "right"];
+            return directions[Math.floor(Math.random() * directions.length)];
+        }
 
-    move() {
-        
-        switch (this.direction) {
-            case "up":
-                this.y -= this.speed;
-                break;
-            case "down":
-                this.y += this.speed;
-                break;
-            case "left":
+        move() {
+            
+            switch (this.direction) {
+                case "up":
+                    this.y -= this.speed;
+                    break;
+                case "down":
+                    this.y += this.speed;
+                    break;
+                case "left":
+                    this.x -= this.speed;
+                    break;
+                case "right":
+                    this.x += this.speed;
+                    break;
+            }
+            if (this.checkCollision(this.obstacles)) {
                 this.x -= this.speed;
-                break;
-            case "right":
-                this.x += this.speed;
-                break;
-        }
-        if (this.checkCollision(this.obstacles)) {
-            this.x -= this.speed;
-            this.randomDirection();
-        }
-       
-        this.avoidObstacles();
-    }
-
-    avoidObstacles() {
-       
-        let nextX = this.x;
-        let nextY = this.y;
-
-        switch (this.direction) {
-            case "up":
-                nextY -= this.speed;
-                break;
-            case "down":
-                nextY += this.speed;
-                break;
-            case "left":
-                nextX -= this.speed;
-                break;
-            case "right":
-                nextX += this.speed;
-                break;
-        }
-
-        let canMove = true;
-
-       
-        for (const obstacle of this.obstacles) {
-            if (
-                nextX < obstacle.x + obstacle.width &&
-                nextX + this.width > obstacle.x &&
-                nextY < obstacle.y + obstacle.height &&
-                nextY + this.height > obstacle.y
-            ) {
-                canMove = false;
-                break;
+                this.randomDirection();
             }
+        
+            this.avoidObstacles();
         }
 
-        if (!canMove) {
-            
-            this.direction = this.randomDirection();
-        }
-    }
+        avoidObstacles() {
+        
+            let nextX = this.x;
+            let nextY = this.y;
 
-    checkCollision(object) {
-        return (
-            this.x < object.x + object.width &&
-            this.x + this.width > object.x &&
-            this.y < object.y + object.height &&
-            this.y + this.height > object.y
-        );
-    }
-    checkCollisionWithOtherEnemies(enemies) {
-        for (const enemy of enemies) {
-            if (enemy !== this && this.checkCollision(enemy)) {
+            switch (this.direction) {
+                case "up":
+                    nextY -= this.speed;
+                    break;
+                case "down":
+                    nextY += this.speed;
+                    break;
+                case "left":
+                    nextX -= this.speed;
+                    break;
+                case "right":
+                    nextX += this.speed;
+                    break;
+            }
+
+            let canMove = true;
+
+        
+            for (const obstacle of this.obstacles) {
+                if (
+                    nextX < obstacle.x + obstacle.width &&
+                    nextX + this.width > obstacle.x &&
+                    nextY < obstacle.y + obstacle.height &&
+                    nextY + this.height > obstacle.y
+                ) {
+                    canMove = false;
+                    break;
+                }
+            }
+
+            if (!canMove) {
+                
                 this.direction = this.randomDirection();
-                break;
+            }
+        }
+
+        checkCollision(object) {
+            return (
+                this.x < object.x + object.width &&
+                this.x + this.width > object.x &&
+                this.y < object.y + object.height &&
+                this.y + this.height > object.y
+            );
+        }
+        checkCollisionWithOtherEnemies(enemies) {
+            for (const enemy of enemies) {
+                if (enemy !== this && this.checkCollision(enemy)) {
+                    this.direction = this.randomDirection();
+                    break;
+                }
             }
         }
     }
-}
 
+    const infoCanvas = document.getElementById("infoCanvas");
+    const infoCtx = infoCanvas.getContext("2d");
 
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
@@ -332,7 +340,6 @@
 
     let EnemysIcon = new Image();
     EnemysIcon.src = "src/Kitty-enemy.png";
-
 
     const obstacles = [
 
@@ -495,6 +502,7 @@
         }
         
         if (gameIsOver === true) {
+            scoreGameOver();
             player.move("");
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, cw, ch);
@@ -503,7 +511,7 @@
             centerText(ctx, "GAME OVER!", 300);
             centerText(ctx, "Press (R) to Reload", 360);
             centerText(ctx, "Score: " + score, 425);
-            centerText(ctx, "Food Eating: " + foodEating, 490);
+            centerText(ctx, "Quesitos Comidos: " + foodEating, 490);
 
             document.addEventListener("keydown", (event) => {
                 if (event.keyCode === 82) { 
@@ -511,16 +519,7 @@
                 }
             });
         }else{
-            ctx.lineWidth = 2;
-            ctx.font = "35px Impact";
-            ctx.fillStyle = "#ffffff"; 
-            ctx.fillText("Score: " + score, 440, 40); 
-            ctx.fillText("P: Paused", 80, 690); 
-            ctx.fillText("Space: +speed", 720, 690); 
-            ctx.fillStyle = "#000000";
-            ctx.strokeText("Score: " + score, 440, 40); 
-            ctx.strokeText("P: Paused", 80, 690); 
-            ctx.strokeText("Space: +speed", 720, 690); 
+            updateScoreCanvas();
         }
 
         if (paused) {
@@ -540,7 +539,7 @@
             ctx.fillText("You Win!", 200, 300);
             ctx.fillText("Press (R) to Reload", 200, 360);
             ctx.fillText("Score: " + score, 200, 430);
-            ctx.fillText("Food Eating: " + foodEating, 200, 490);
+            ctx.fillText("Quesitos Comidos: " + foodEating, 200, 490);
             ctx.drawImage(Winner, 500,200,350,350);
         }
     }
@@ -582,11 +581,27 @@
             updateEnemies();
         }
 
-    player.update(cw, ch, foods, obstacles);
-    draw();
-    requestAnimationFrame(update);
-}
+        player.update(cw, ch, foods, obstacles);
+        draw();
+        requestAnimationFrame(update);
+    }
 
+    function updateScoreCanvas() {
+        infoCtx.fillStyle = "black";
+        infoCtx.fillRect(0,0,infoCanvas.width,infoCanvas.height);
+        infoCtx.font = "24px Impact";
+        infoCtx.fillStyle = "white";
+        infoCtx.fillText("Score:", 20, 30);
+        infoCtx.fillText(score, 20, 60);
+        infoCtx.fillText("Quesitos comidos:", 20, 110);
+        infoCtx.fillText(foodEating, 20, 140);
+        infoCtx.fillText("Instrucciones:",20,190);
+    }
+    function scoreGameOver(){
+        infoCtx.fillStyle = "black";
+        infoCtx.fillRect(0,0,infoCanvas.width,infoCanvas.height);
+
+    }
 
     update();
 
