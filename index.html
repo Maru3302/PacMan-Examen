@@ -495,12 +495,15 @@
         }
         
         if (gameIsOver === true) {
+            player.move("");
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, cw, ch);
             ctx.font = "35px Impact";
             ctx.fillStyle = "white";
-            ctx.fillText("GAME OVER!", 425, 300);
-            ctx.fillText("Press (R) to Reload", 370, 360);
+            centerText(ctx, "GAME OVER!", 300);
+            centerText(ctx, "Press (R) to Reload", 360);
+            centerText(ctx, "Score: " + score, 425);
+            centerText(ctx, "Food Eating: " + foodEating, 490);
 
             document.addEventListener("keydown", (event) => {
                 if (event.keyCode === 82) { 
