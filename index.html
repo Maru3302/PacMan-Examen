@@ -304,10 +304,10 @@
     const ctx = canvas.getContext("2d");
 
     const cw = 1000, ch = 700;
-    let score = 0; //Max 3930
+    let score = 0; 
     let paused = false;
     let pausedSpeed = 0;
-    let foodEating =0; //Max 785
+    let foodEating =0; //Max 353 to win
     let gameIsOver = false;
     
     const player = new Player(ctx, 275, 275,50,50, 5);
@@ -321,8 +321,10 @@
     PlayerRight.src = "src/Mouse-right.png";
     let PlayerDefault= new Image();
     PlayerDefault.src = "src/Mouse-default.png";
-    
 
+    let Winner = new Image();
+    Winner.src= "src/Win-rat.png";
+    
     const foods = [];
     const foodSpacing = 5
     const foodWidth = 15;
@@ -505,6 +507,17 @@
                     location.reload();
                 }
             });
+        }else{
+            ctx.lineWidth = 2;
+            ctx.font = "35px Impact";
+            ctx.fillStyle = "#ffffff"; 
+            ctx.fillText("Score: " + score, 440, 40); 
+            ctx.fillText("P: Paused", 80, 690); 
+            ctx.fillText("Space: +speed", 720, 690); 
+            ctx.fillStyle = "#000000";
+            ctx.strokeText("Score: " + score, 440, 40); 
+            ctx.strokeText("P: Paused", 80, 690); 
+            ctx.strokeText("Space: +speed", 720, 690); 
         }
 
         if (paused) {
@@ -515,18 +528,24 @@
             ctx.fillText("¡Paused!", 425, 300);
             ctx.fillText("Press (P) to continue", 350, 360);
         }
-        
-        ctx.lineWidth = 2;
-        ctx.font = "35px Impact";
-        ctx.fillStyle = "#ffffff"; 
-        ctx.fillText("Score: " + score, 440, 40); 
-        ctx.fillText("P: Paused", 80, 690); 
-        ctx.fillText("Space: +speed", 720, 690); 
-        ctx.fillStyle = "#000000";
-        ctx.strokeText("Score: " + score, 440, 40); 
-        ctx.strokeText("P: Paused", 80, 690); 
-        ctx.strokeText("Space: +speed", 720, 690); 
+        if(foodEating >= 353){
+            player.move("");
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.font = "35px Impact";
+            ctx.fillStyle = "white";
+            ctx.fillText("You Win!", 200, 300);
+            ctx.fillText("Press (R) to Reload", 200, 360);
+            ctx.fillText("Score: " + score, 200, 430);
+            ctx.fillText("Food Eating: " + foodEating, 200, 490);
+            ctx.drawImage(Winner, 500,200,350,350);
+        }
+    }
 
+    function centerText(ctx, text, y) {
+        const textWidth = ctx.measureText(text).width;
+        const x = (ctx.canvas.width - textWidth) / 2;
+        ctx.fillText(text, x, y);
     }
 
     function updateEnemies() {
@@ -562,7 +581,7 @@
 
     player.update(cw, ch, foods, obstacles);
     draw();
-    requestAnimationFrame(update); // Move this line outside of the condition
+    requestAnimationFrame(update);
 }
 
 
