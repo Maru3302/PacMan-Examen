@@ -529,7 +529,7 @@
 
             document.addEventListener("keydown", (event) => {
                 if (event.keyCode === 82) { 
-                    location.reload();
+                   resetGame();
                 }
             });
         }else{
@@ -559,7 +559,7 @@
 
             document.addEventListener("keydown", (event) => {
                 if (event.keyCode === 82) { 
-                    location.reload();
+                    resetGame();
                 }
             });
         }
@@ -626,6 +626,23 @@
         infoCtx.fillRect(0,0,infoCanvas.width,infoCanvas.height);
 
     }
+    function resetGame() {
+        score = 0;
+        foodEating = 0;
+        gameIsOver = false;
+
+        player.x = 275;
+        player.y = 275;
+
+        for (const enemy of enemies) {
+            enemy.spawnRandomPosition();
+        }
+
+        for (const food of foods) {
+            food.eaten = false;
+        }
+    }
+
 
     update();
 
