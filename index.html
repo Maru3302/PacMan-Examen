@@ -22,7 +22,6 @@
     <div>
         <canvas id="canvas" width="1000" height="700"></canvas>
         <canvas id="infoCanvas" width="250" height="700"></canvas>
-        <input type="text" id="miCampoTexto">
     </div>
 
 <script>
@@ -320,8 +319,6 @@
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
-    var campoTexto = document.getElementById("miCampoTexto");
-
     const cw = 1000, ch = 700;
     let score = 0; 
     let paused = false;
@@ -360,8 +357,6 @@
 
     let EnemysIcon = new Image();
     EnemysIcon.src = "src/Kitty-enemy.png";
-
-    campoTexto.focus();
 
     const obstacles = [
 
@@ -525,6 +520,7 @@
     
         for (const obstacle of obstacles) {
             obstacle.draw();
+            
         }
         
         if (gameIsOver === true) {
@@ -534,14 +530,21 @@
             ctx.fillRect(0, 0, cw, ch);
             ctx.font = "35px Impact";
             ctx.fillStyle = "white";
-            centerText(ctx, "GAME OVER!", 100);
-            centerText(ctx, "Presiona (R) para reintentar", 160);
-            centerText(ctx, "Score: " + score, 225);
-            centerText(ctx, "Quesitos Comidos: " + foodEating, 290);
+            centerText(ctx, "GAME OVER!", 50);
+            centerText(ctx, "Presiona (R) para reintentar", 110);
+            centerText(ctx, "Score: " + score, 175);
+            centerText(ctx, "Quesitos Comidos: " + foodEating, 240);
+
+            const displayMinutes = Math.floor(secondsRemaining / 60);
+            const displaySeconds = secondsRemaining % 60;
+            centerText(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 290); 
+          
+           
             ctx.drawImage(Loser, 350, 310, 350, 350);
 
         }else{
             updateScoreCanvas();
+            
         }
 
         if (paused) {
@@ -560,10 +563,15 @@
             ctx.fillRect(0, 0, cw, ch);
             ctx.font = "35px Impact";
             ctx.fillStyle = "white";
-            centerText(ctx, "You Win!", 100);
-            centerText(ctx, "Presiona (R) para jugar denuevo", 160);
-            centerText(ctx, "Score: " + score, 225);
-            centerText(ctx, "Quesitos Comidos: " + foodEating, 290);
+            centerText(ctx, "You Win!", 50);
+            centerText(ctx, "Presiona (R) para jugar denuevo", 110);
+            centerText(ctx, "Score: " + score, 175);
+            centerText(ctx, "Quesitos Comidos: " + foodEating, 240);
+
+            const displayMinutes = Math.floor(secondsRemaining / 60);
+            const displaySeconds = secondsRemaining % 60;
+            centerText(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 290); 
+          
             ctx.drawImage(Winner, 350, 310, 350, 350);
 
         }
@@ -620,10 +628,20 @@
         infoCtx.fillText(score, 20, 60);
         infoCtx.fillText("Quesitos comidos:", 20, 110);
         infoCtx.fillText(foodEating, 20, 140);
-        infoCtx.fillText("Instrucciones:",20,190);
-        infoCtx.drawImage(Control, 40,220, 161, 140);
-        infoCtx.drawImage(ControlPaused, 20, 360, 40, 40);
-        infoCtx.fillText("Pusar",80,390);
+
+        infoCtx.fillText("Tiempo:", 20, 190); 
+        const displayMinutes = Math.floor(secondsRemaining / 60);
+        const displaySeconds = secondsRemaining % 60;
+        infoCtx.fillText(
+            `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`,
+            20,
+            220
+        ); 
+
+        infoCtx.fillText("Instrucciones:",20,270);
+        infoCtx.drawImage(Control, 40,300, 161, 140);
+        infoCtx.drawImage(ControlPaused, 20, 450, 40, 40);
+        infoCtx.fillText("Pausar",80,480);
     }
     function scoreGameOver(){
         infoCtx.fillStyle = "black";
@@ -638,6 +656,8 @@
         player.x = 275;
         player.y = 275;
 
+        secondsRemaining = 0;
+
         for (const enemy of enemies) {
             enemy.spawnRandomPosition();
         }
@@ -645,7 +665,34 @@
         for (const food of foods) {
             food.eaten = false;
         }    
+        
+        startTimer();
     }
+
+    let minutes = 0;
+    let maxSeconds = 1800;
+    let secondsRemaining = minutes * 60;
+    let timerInterval;
+
+
+    function startTimer() {
+        clearInterval(timerInterval); 
+
+        timerInterval = setInterval(() => {
+            if (!paused) {
+                const displayMinutes = Math.floor(secondsRemaining / 60);
+                const displaySeconds = secondsRemaining % 60;
+
+                if (foodEating >= 353 || gameIsOver === true) {
+                    clearInterval(timerInterval); 
+                } else {
+                    secondsRemaining++; 
+                }
+            }
+        }, 1000); 
+    }
+
+    startTimer();
 
     update();
 
