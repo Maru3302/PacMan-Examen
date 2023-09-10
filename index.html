@@ -357,7 +357,6 @@
 
     let EnemysIcon = new Image();
     EnemysIcon.src = "src/Kitty-enemy.png";
-
     const obstacles = [
 
         new Obstacle(ctx, 0, 0, 30, 300, "#ebdbc0"),
@@ -473,9 +472,10 @@
                 PauseAll();
                 break;
             case 82:
-            if (gameIsOver === true || foodEating >= 353){
+            if (gameIsOver === true || foodEating === 353){
                 resetGame(); 
             }
+            else{}
                 break;
         }
     });
