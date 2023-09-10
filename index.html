@@ -22,7 +22,6 @@
     <div>
         <canvas id="canvas" width="1000" height="700"></canvas>
         <canvas id="infoCanvas" width="250" height="700"></canvas>
-        <input type="text" id="miCampoTexto">
     </div>
 
 <script>
@@ -320,8 +319,6 @@
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
-    var campoTexto = document.getElementById("miCampoTexto");
-
     const cw = 1000, ch = 700;
     let score = 0; 
     let paused = false;
@@ -360,9 +357,7 @@
 
     let EnemysIcon = new Image();
     EnemysIcon.src = "src/Kitty-enemy.png";
-
-    campoTexto.focus();
-
+    
     const obstacles = [
 
         new Obstacle(ctx, 0, 0, 30, 300, "#ebdbc0"),
