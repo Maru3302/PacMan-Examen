@@ -8,7 +8,7 @@
 </head>
 <style>
     canvas {
-        background-color: #ebdbc0;
+        background-color: rgb(235, 219, 192);
     }
     body {
         background-color: rgb(24, 26, 27);
@@ -22,6 +22,7 @@
     <div>
         <canvas id="canvas" width="1000" height="700"></canvas>
         <canvas id="infoCanvas" width="250" height="700"></canvas>
+        <input type="text" id="miCampoTexto">
     </div>
 
 <script>
@@ -319,6 +320,8 @@
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
+    var campoTexto = document.getElementById("miCampoTexto");
+
     const cw = 1000, ch = 700;
     let score = 0; 
     let paused = false;
@@ -341,6 +344,9 @@
     let Winner = new Image();
     Winner.src= "src/Win-rat.png";
 
+    let Loser = new Image();
+    Loser.src= "src/Lose-rat.png";
+
     let Control = new Image();
     Control.src = "src/control.png";
 
@@ -354,6 +360,8 @@
 
     let EnemysIcon = new Image();
     EnemysIcon.src = "src/Kitty-enemy.png";
+
+    campoTexto.focus();
 
     const obstacles = [
 
@@ -469,7 +477,11 @@
             case 80:
                 PauseAll();
                 break;
-
+            case 82:
+            if (gameIsOver === true || foodEating >= 353){
+                resetGame(); 
+            }
+                break;
         }
     });
 
@@ -522,16 +534,12 @@
             ctx.fillRect(0, 0, cw, ch);
             ctx.font = "35px Impact";
             ctx.fillStyle = "white";
-            centerText(ctx, "GAME OVER!", 300);
-            centerText(ctx, "Press (R) to Reload", 360);
-            centerText(ctx, "Score: " + score, 425);
-            centerText(ctx, "Quesitos Comidos: " + foodEating, 490);
+            centerText(ctx, "GAME OVER!", 100);
+            centerText(ctx, "Presiona (R) para reintentar", 160);
+            centerText(ctx, "Score: " + score, 225);
+            centerText(ctx, "Quesitos Comidos: " + foodEating, 290);
+            ctx.drawImage(Loser, 350, 310, 350, 350);
 
-            document.addEventListener("keydown", (event) => {
-                if (event.keyCode === 82) { 
-                   resetGame();
-                }
-            });
         }else{
             updateScoreCanvas();
         }
@@ -544,24 +552,20 @@
             ctx.fillText("¡Paused!", 425, 300);
             ctx.fillText("Press (P) to continue", 350, 360);
         }
-        if(foodEating >= 353){
+       
+        if (foodEating >= 353) {
             scoreGameOver();
             player.move("");
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, cw, ch);
             ctx.font = "35px Impact";
             ctx.fillStyle = "white";
-            ctx.fillText("You Win!", 200, 300);
-            ctx.fillText("Press (R) to Reload", 200, 360);
-            ctx.fillText("Score: " + score, 200, 430);
-            ctx.fillText("Quesitos Comidos: " + foodEating, 200, 490);
-            ctx.drawImage(Winner, 520,200,350,350);
+            centerText(ctx, "You Win!", 100);
+            centerText(ctx, "Presiona (R) para jugar denuevo", 160);
+            centerText(ctx, "Score: " + score, 225);
+            centerText(ctx, "Quesitos Comidos: " + foodEating, 290);
+            ctx.drawImage(Winner, 350, 310, 350, 350);
 
-            document.addEventListener("keydown", (event) => {
-                if (event.keyCode === 82) { 
-                    resetGame();
-                }
-            });
         }
     }
 
@@ -640,9 +644,8 @@
 
         for (const food of foods) {
             food.eaten = false;
-        }
+        }    
     }
-
 
     update();
 
