@@ -16,6 +16,7 @@
     #contenedor {
         display: flex;
     }
+   
 </style>
 <body>
 
@@ -23,8 +24,18 @@
         <canvas id="canvas" width="1000" height="700"></canvas>
         <canvas id="infoCanvas" width="250" height="700"></canvas>
     </div>
-
+    <audio id="background-music" autoplay loop>
+        <source src="./sounds/BackGround-song.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="cat">
+        <source src="./sounds/Angry-cat.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="rat">
+        <source src="./sounds/Win-rat.mp3" type="audio/mpeg">
+    </audio>
+   
 <script>
+
     class Player {
         constructor(ctx, x, y, width, height, speed) {
             this.ctx = ctx;
@@ -231,7 +242,7 @@
         }
 
         move() {
-            
+
             switch (this.direction) {
                 case "up":
                     this.y -= this.speed;
@@ -241,9 +252,15 @@
                     break;
                 case "left":
                     this.x -= this.speed;
+                    if (this.x < 0) {
+                        this.x = cw;
+                    }
                     break;
                 case "right":
                     this.x += this.speed;
+                    if (this.x > cw) {
+                        this.x = -this.width;
+                    }
                     break;
             }
             if (this.checkCollision(this.obstacles)) {
@@ -276,7 +293,6 @@
 
             let canMove = true;
 
-        
             for (const obstacle of this.obstacles) {
                 if (
                     nextX < obstacle.x + obstacle.width &&
@@ -291,7 +307,50 @@
 
             if (!canMove) {
                 
-                this.direction = this.randomDirection();
+                const possibleDirections = ["up", "down", "left", "right"];
+                const safeDirections = possibleDirections.filter(direction => {
+                    let testX = this.x;
+                    let testY = this.y;
+
+                    switch (direction) {
+                        case "up":
+                            testY -= this.speed;
+                            break;
+                        case "down":
+                            testY += this.speed;
+                            break;
+                        case "left":
+                            testX -= this.speed;
+                            break;
+                        case "right":
+                            testX += this.speed;
+                            break;
+                    }
+
+                    let canMoveSafely = true;
+
+                    for (const obstacle of this.obstacles) {
+                        if (
+                            testX < obstacle.x + obstacle.width &&
+                            testX + this.width > obstacle.x &&
+                            testY < obstacle.y + obstacle.height &&
+                            testY + this.height > obstacle.y
+                        ) {
+                            canMoveSafely = false;
+                            break;
+                        }
+                    }
+
+                    return canMoveSafely;
+                });
+
+                
+                if (safeDirections.length > 0) {
+                    this.direction = safeDirections[Math.floor(Math.random() * safeDirections.length)];
+                } else {
+                   
+                    this.direction = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+                }
             }
         }
 
@@ -303,6 +362,7 @@
                 this.y + this.height > object.y
             );
         }
+
         checkCollisionWithOtherEnemies(enemies) {
             for (const enemy of enemies) {
                 if (enemy !== this && this.checkCollision(enemy)) {
@@ -313,6 +373,12 @@
         }
     }
 
+    
+    let backgroundMusic = document.getElementById("background-music");
+    
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+    
     const infoCanvas = document.getElementById("infoCanvas");
     const infoCtx = infoCanvas.getContext("2d");
 
@@ -444,7 +510,7 @@
             }
         }
     }
-
+  
     window.requestAnimationFrame = (function () {
         return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -472,17 +538,41 @@
                 PauseAll();
                 break;
             case 82:
-            if (gameIsOver === true || foodEating === 353){
+            if (gameIsOver === true || foodEating >= 353){
                 resetGame(); 
             }
             else{}
                 break;
         }
     });
+   
+    document.body.addEventListener("keydown", function () {
+        const backgroundMusic = document.getElementById("background-music");
+     
+        switch(event.keyCode){
+            case 87:
+                backgroundMusic.play();
+                break;
+            case 83:
+                backgroundMusic.play();
+                break;
+            case 65:
+                backgroundMusic.play();
+                break;
+            case 68:
+                backgroundMusic.play();
+                break;
+            case 80:
+                backgroundMusic.play();
+                break;
+        }
+        document.body.removeEventListener("keydown", arguments.callee);
+    });
 
     function PauseAll() {
         paused = !paused;
         if (paused) {
+            backgroundMusic.pause();
             pausedSpeed = player.speed;
             player.speed = 0;
             for (const enemy of enemies) {
@@ -491,7 +581,7 @@
             }
         
         } else {
-            
+            backgroundMusic.play();
             player.speed = pausedSpeed;
             for (const enemy of enemies) {
                 enemy.speed = enemy.pausedSpeed;
@@ -499,7 +589,6 @@
         }
     }
     function draw() {
-        
         ctx.clearRect(0, 0, cw, ch);
 
        for (const food of foods) {
@@ -534,7 +623,6 @@
             centerText(ctx, "Presiona (R) para reintentar", 110);
             centerText(ctx, "Score: " + score, 175);
             centerText(ctx, "Quesitos Comidos: " + foodEating, 240);
-
             const displayMinutes = Math.floor(secondsRemaining / 60);
             const displaySeconds = secondsRemaining % 60;
             centerText(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 290); 
@@ -548,15 +636,16 @@
         }
 
         if (paused) {
-            ctx.fillStyle = "rgba(184, 184, 184,0.5)";
+            ctx.fillStyle = "rgba(184, 184, 184,0.2)";
             ctx.fillRect(0, 0, 1000, 700);
             ctx.font = "35px Impact";
             ctx.fillStyle = "black";
-            ctx.fillText("¡Paused!", 425, 300);
-            ctx.fillText("Press (P) to continue", 350, 360);
+            centerText(ctx, "Pausa!", 300);
+            centerText(ctx, "Presiona (P) para continuar", 360);
         }
        
         if (foodEating >= 353) {
+            rat.play();
             scoreGameOver();
             player.move("");
             ctx.fillStyle = "black";
@@ -567,7 +656,6 @@
             centerText(ctx, "Presiona (R) para jugar denuevo", 110);
             centerText(ctx, "Score: " + score, 175);
             centerText(ctx, "Quesitos Comidos: " + foodEating, 240);
-
             const displayMinutes = Math.floor(secondsRemaining / 60);
             const displaySeconds = secondsRemaining % 60;
             centerText(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 290); 
@@ -591,6 +679,7 @@
     }
 
     function update() {
+
         if (!paused) {
             ctx.clearRect(0, 0, cw, ch);
             let collisionDetected = false;
@@ -608,12 +697,13 @@
             }
             for (const enemy of enemies) {
                 if (player.checkCollision(enemy)) {
+                    cat.play();
                     gameIsOver = true;
                 }
             }
             updateEnemies();
         }
-
+       
         player.update(cw, ch, foods, obstacles);
         draw();
         requestAnimationFrame(update);
@@ -649,6 +739,13 @@
 
     }
     function resetGame() {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+        cat.pause();
+        cat.currentTime = 0;
+        rat.pause();
+        rat.currentTime = 0;
+
         score = 0;
         foodEating = 0;
         gameIsOver = false;
@@ -667,6 +764,7 @@
         }    
         
         startTimer();
+        backgroundMusic.play();
     }
 
     let minutes = 0;
@@ -693,7 +791,6 @@
     }
 
     startTimer();
-
     update();
 
     function randomInteger(max) {
