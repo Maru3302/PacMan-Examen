@@ -354,6 +354,88 @@
             }
         }
 
+        avoidTransparentObstacles(transparentObstacles) {
+            let nextX = this.x;
+            let nextY = this.y;
+
+            switch (this.direction) {
+                case "up":
+                    nextY -= this.speed;
+                    break;
+                case "down":
+                    nextY += this.speed;
+                    break;
+                case "left":
+                    nextX -= this.speed;
+                    break;
+                case "right":
+                    nextX += this.speed;
+                    break;
+            }
+
+            let canMove = true;
+
+            for (const obstacle of transparentObstacles) {
+                if (
+                    nextX < obstacle.x + obstacle.width &&
+                    nextX + this.width > obstacle.x &&
+                    nextY < obstacle.y + obstacle.height &&
+                    nextY + this.height > obstacle.y
+                ) {
+                    canMove = false;
+                    break;
+                }
+            }
+
+            if (!canMove) {
+                
+                const possibleDirections = ["up", "down", "left", "right"];
+                const safeDirections = possibleDirections.filter(direction => {
+                    let testX = this.x;
+                    let testY = this.y;
+
+                    switch (direction) {
+                        case "up":
+                            testY -= this.speed;
+                            break;
+                        case "down":
+                            testY += this.speed;
+                            break;
+                        case "left":
+                            testX -= this.speed;
+                            break;
+                        case "right":
+                            testX += this.speed;
+                            break;
+                    }
+
+                    let canMoveSafely = true;
+
+                    for (const obstacle of this.obstacles) {
+                        if (
+                            testX < obstacle.x + obstacle.width &&
+                            testX + this.width > obstacle.x &&
+                            testY < obstacle.y + obstacle.height &&
+                            testY + this.height > obstacle.y
+                        ) {
+                            canMoveSafely = false;
+                            break;
+                        }
+                    }
+
+                    return canMoveSafely;
+                });
+
+                
+                if (safeDirections.length > 0) {
+                    this.direction = safeDirections[Math.floor(Math.random() * safeDirections.length)];
+                } else {
+                   
+                    this.direction = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+                }
+            }
+        }
+
         checkCollision(object) {
             return (
                 this.x < object.x + object.width &&
@@ -370,6 +452,12 @@
                     break;
                 }
             }
+        }
+    }
+    class TransparentObstacle extends Obstacle {
+        constructor(ctx, x, y, width, height, color, isTransparent) {
+            super(ctx, x, y, width, height, color);
+            this.isTransparent = isTransparent;
         }
     }
 
@@ -468,8 +556,20 @@
 
         new Obstacle(ctx, 405, 385, 200, 20, "#8b501f"),
         
+        
+    ];
+    const transparentObstacles = [
+        new TransparentObstacle(ctx, cw-140, 125, 20, 455, "rgba(0, 0, 0, 0.0)", true),
+        new TransparentObstacle(ctx, 125, 125, 20, 455, "rgba(0, 0, 0, 0.0)", true),
     ];
 
+    const allObstacles = obstacles.concat(transparentObstacles);
+
+
+    
+
+
+    
     const enemies = [];
     const numEnemies = 5;
 
@@ -675,6 +775,7 @@
         for (const enemy of enemies) {
             enemy.checkCollisionWithOtherEnemies(enemies);
             enemy.move();
+            enemy.avoidTransparentObstacles(transparentObstacles);
         }
     }
 
