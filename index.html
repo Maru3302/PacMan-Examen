@@ -7,15 +7,32 @@
     <link rel="icon" href="src/Mouse-icon.ico"></link>
 </head>
 <style>
+    body {
+        background-color: rgb(24, 26, 27);
+        align-items: center;
+        margin: 0;
+        height: 100%; /* Añade esto para ocupar todo el alto de la ventana */
+    }
+    div {
+        display: flex;
+        justify-content: center; /* Centra horizontalmente */
+        height: 100vh; /* Cambia esto a 100vh para que ocupe todo el alto de la ventana */
+        overflow: hidden;
+    }
     canvas {
         background-color: rgb(235, 219, 192);
     }
-    body {
-        background-color: rgb(24, 26, 27);
+
+    #canvas {
+        flex: 1; 
     }
-    #contenedor {
-        display: flex;
+
+    #infoCanvas {
+        width: 400px;
+         height: 100%;
     }
+
+    
    
 </style>
 <body>
@@ -516,9 +533,9 @@
     EnemysIcon.src = "src/Kitty-enemy.png";
     const obstacles = [
 
-        new Obstacle(ctx, 0, 0, 30, 300, "#ebdbc0"),
+        new Obstacle(ctx, -10, 0, 30, 300, "#ebdbc0"),
         new Obstacle(ctx, cw-25, 0, 30, 300, "#ebdbc0"),
-        new Obstacle(ctx, 0, 400, 30, 300, "#ebdbc0"),
+        new Obstacle(ctx, -10, 400, 30, 300, "#ebdbc0"),
         new Obstacle(ctx, cw-25, 400, 30, 300, "#ebdbc0"),
 
 
@@ -526,7 +543,7 @@
         new Obstacle(ctx, 30, ch-25, 945, 20, "#8b501f"),
 
         new Obstacle(ctx, 20, 15, 20, 290, "#8b501f"),
-        new Obstacle(ctx, cw-45, 5, 20, 300, "#8b501f"),
+        new Obstacle(ctx, cw-45, 15, 20, 290, "#8b501f"),
         
         new Obstacle(ctx, 20, 400, 20, 295, "#8b501f"),
         new Obstacle(ctx, cw-45, 400, 20, 295, "#8b501f"),
@@ -906,6 +923,39 @@
     function randomInteger(max) {
         return Math.floor(Math.random() * (max + 1));
     }
+    function resizeCanvas() {
+    const canvasContainer = document.getElementById("canvas-container");
+    const canvas = document.getElementById("canvas");
+    const infoCanvas = document.getElementById("infoCanvas");
+    
+    // Obtiene el ancho y la altura de la ventana
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    // Calcula el ancho y el alto máximo para los canvas
+    const maxCanvasWidth = windowWidth - 250; // Resta el ancho del canvas de información
+    const maxCanvasHeight = windowHeight;
+    
+    // Establece el tamaño del contenedor y los canvas
+    canvasContainer.style.width = maxCanvasWidth + "px";
+    canvasContainer.style.height = maxCanvasHeight + "px";
+    canvas.width = maxCanvasWidth;
+    canvas.height = maxCanvasHeight;
+    infoCanvas.height = maxCanvasHeight;
+    
+    // Centra verticalmente los canvas en el contenedor
+    const canvasVerticalOffset = (windowHeight - maxCanvasHeight) / 2;
+    canvas.style.marginTop = canvasVerticalOffset + "px";
+    infoCanvas.style.marginTop = canvasVerticalOffset + "px";
+    
+    // Llama a la función para centrar el contenido nuevamente
+    centerCanvas();
+}
+
+window.addEventListener("load", resizeCanvas);
+
+// Llama a resizeCanvas() cuando se redimensiona la ventana
+window.addEventListener("resize", resizeCanvas);
 
 </script>
 
