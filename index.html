@@ -27,7 +27,7 @@
     <audio id="background-music" autoplay loop>
         <source src="./sounds/BackGround-song.mp3" type="audio/mpeg">
     </audio>
-    <audio id="cat">
+    <audio id="phantom-cat">
         <source src="./sounds/Angry-cat.mp3" type="audio/mpeg">
     </audio>
     <audio id="rat">
@@ -463,7 +463,10 @@
 
     
     let backgroundMusic = document.getElementById("background-music");
-    
+    let cat = document.getElementById("phantom-cat");
+
+    cat.pause();
+    cat.currentTime = 0;
     backgroundMusic.pause();
     backgroundMusic.currentTime = 0;
     
@@ -564,12 +567,6 @@
     ];
 
     const allObstacles = obstacles.concat(transparentObstacles);
-
-
-    
-
-
-    
     const enemies = [];
     const numEnemies = 5;
 
@@ -645,7 +642,7 @@
                 break;
         }
     });
-   
+    
     document.body.addEventListener("keydown", function () {
         const backgroundMusic = document.getElementById("background-music");
      
@@ -664,6 +661,9 @@
                 break;
             case 80:
                 backgroundMusic.play();
+                break;
+            default:
+                cat.pause();    
                 break;
         }
         document.body.removeEventListener("keydown", arguments.callee);
@@ -801,6 +801,10 @@
                     cat.play();
                     gameIsOver = true;
                 }
+                if (enemy.checkCollision(player)) {
+                    cat.play();
+                    gameIsOver = true;
+                }
             }
             updateEnemies();
         }
@@ -840,9 +844,14 @@
 
     }
     function resetGame() {
-        backgroundMusic.pause();
+        if (!backgroundMusic.paused) {
+            backgroundMusic.pause();
+        }
         backgroundMusic.currentTime = 0;
-        cat.pause();
+        
+        if (!cat.paused) {
+            cat.pause();
+        }
         cat.currentTime = 0;
         rat.pause();
         rat.currentTime = 0;
