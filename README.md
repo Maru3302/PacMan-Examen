@@ -1,7 +1,7 @@
 # PacMan-Examen
 
-Pacman Game
-Este es un proyecto de juego de Pacman desarrollado en HTML y JavaScript como parte de un proyecto universitario. 
+PacRat Game
+ es un proyecto de juego de Pacman desarrollado en HTML y JavaScript como parte de un proyecto universitario. 
 El juego se basa en el icónico clásico de los videojuegos Pac-Man y ha sido creado con el objetivo de aprender y 
 aplicar conceptos de programación web y desarrollo de juegos.
 
