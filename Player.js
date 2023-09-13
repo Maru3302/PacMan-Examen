@@ -1,6 +1,3 @@
-
-
-
 class Player {
     constructor(ctx, x, y, width, height, speed) {
         this.ctx = ctx;

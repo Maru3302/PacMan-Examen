@@ -130,13 +130,13 @@ function draw() {
         ctx.fillRect(0, 0, cw, ch);
         ctx.font = "35px Impact";
         ctx.fillStyle = "white";
-        centerText(ctx, "GAME OVER!", 50);
-        centerText(ctx, "Presiona (R) para reintentar", 110);
-        centerText(ctx, "Score: " + score, 175);
-        centerText(ctx, "Quesitos Comidos: " + foodEating, 240);
+        centerTextWindow(ctx, "GAME OVER!", 50);
+        centerTextWindow(ctx, "Presiona (R) para reintentar", 110);
+        centerTextWindow(ctx, "Score: " + score, 175);
+        centerTextWindow(ctx, "Quesitos Comidos: " + foodEating, 240);
         const displayMinutes = Math.floor(secondsRemaining / 60);
         const displaySeconds = secondsRemaining % 60;
-        centerText(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 300); 
+        centerTextWindow(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 300); 
         centerImage(ctx, Loser, 350, 350, 310);
         
     }else{
@@ -155,25 +155,31 @@ function draw() {
    
     if (foodEating >= 353) {
         rat.play();
+        cat.pause();
         scoreGameOver();
         player.move("");
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, cw, ch);
         ctx.font = "35px Impact";
         ctx.fillStyle = "white";
-        centerText(ctx, "You Win!", 50);
-        centerText(ctx, "Presiona (R) para jugar denuevo", 110);
-        centerText(ctx, "Score: " + score, 175);
-        centerText(ctx, "Quesitos Comidos: " + foodEating, 240);
+        centerTextWindow(ctx, "You Win!", 50);
+        centerTextWindow(ctx, "Presiona (R) para jugar denuevo", 110);
+        centerTextWindow(ctx, "Score: " + score, 175);
+        centerTextWindow(ctx, "Quesitos Comidos: " + foodEating, 240);
         const displayMinutes = Math.floor(secondsRemaining / 60);
         const displaySeconds = secondsRemaining % 60;
-        centerText(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 300); 
+        centerTextWindow(ctx,"Tiempo jugado: " + `${String(displayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`, 300); 
         centerImage(ctx, Winner, 350, 350, 310);
 
     }
 }
 
 function centerText(ctx, text, y) {
+    const textWidth = ctx.measureText(text).width;
+    const x = (ctx.canvas.width  - textWidth) / 2;
+    ctx.fillText(text, x, y);
+}
+function centerTextWindow(ctx, text, y) {
     const textWidth = ctx.measureText(text).width;
     const x = ((ctx.canvas.width + infoCtx.canvas.width )- textWidth) / 2;
     ctx.fillText(text, x, y);

@@ -31,6 +31,7 @@
         max-width: 400px;
         height: 100%;
     }
+   
 </style>
 <body>
 
@@ -57,7 +58,6 @@
 </body>
 <script>
     
-
     let backgroundMusic = document.getElementById("background-music");
     let cat = document.getElementById("phantom-cat");
 
@@ -102,6 +102,9 @@
 
     let ControlPaused = new Image();
     ControlPaused.src = "src/control-pause.png";
+    
+    let Cheese = new Image();
+    Cheese.src = "src/Cheese-point.png"; 
 
     const foods = [];
     const foodSpacing = 5
@@ -203,7 +206,7 @@
             }
         }
     }
-
+     
     startTimer();
     update();
 
