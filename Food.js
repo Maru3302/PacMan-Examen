@@ -10,15 +10,11 @@ class Food {
 
     draw(color) {
         if (!this.eaten) {
-            //this.ctx.fillStyle = "yellow";
             ctx.drawImage(Cheese, this.x,this.y,this.width,this.height);
-            //this.ctx.fillRect(this.x, this.y, this.width, this.height);
-            //this.ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
        
     }
     
-
     checkCollision(object) {
         return (
             this.x < object.x + object.width &&

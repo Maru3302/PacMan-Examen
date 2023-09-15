@@ -102,6 +102,7 @@ function PauseAll() {
 function draw() {
     ctx.clearRect(0, 0, cw, ch);
 
+    
    for (const food of foods) {
     food.draw();
 
@@ -113,7 +114,8 @@ function draw() {
     }
     
     player.draw();
-    
+    megaCheese.draw();
+
     for (const enemy of enemies) {
         enemy.draw();
     }
@@ -198,13 +200,21 @@ function updateEnemies() {
         enemy.avoidTransparentObstacles(transparentObstacles);
     }
 }
-
+let lastAudioPlayScore = 0;
+let pointscore = 5000;
 function update() {
 
     if (!paused) {
         ctx.clearRect(0, 0, cw, ch);
         let collisionDetected = false;
-
+        let eatMegaFood = false;
+       
+        if (score >= pointscore && score !== lastAudioPlayScore) {
+            Eat.currentTime = 0;
+            Eat.play();
+            lastAudioPlayScore = score;
+            pointscore+=5000;
+        }
         if (
             !collisionDetected &&
             player.x < foods.x + 30 &&
@@ -212,7 +222,7 @@ function update() {
             player.y < food.y + 30 &&
             player.y + 50 > food.y
         ) {
-            score += 5;
+            score += 50;
             food.updatePosition(cw, ch);
             collisionDetected = true;
         }
@@ -226,10 +236,22 @@ function update() {
                 gameIsOver = true;
             }
         }
+        if (
+            !eatMegaFood &&
+            player.x < megaCheese.x + 30 &&
+            player.x + 50 > megaCheese.x &&
+            player.y < megaCheese.y + 30 &&
+            player.y + 50 > megaCheese.y
+        ) {
+            megaCheese.onEat(); 
+            score += megaCheese.selectedOption.scoreValue;
+            megaCheese.updatePosition(cw, ch, obstacles);
+            eatMegaFood = true;
+        }
         updateEnemies();
     }
    
-    player.update(cw, ch, foods, obstacles);
+    player.update(cw, ch, foods,megaCheese, obstacles);
     draw();
     requestAnimationFrame(update);
 }
@@ -243,7 +265,6 @@ function updateScoreCanvas() {
     infoCtx.fillText(score, 20, 60);
     infoCtx.fillText("Quesitos comidos:", 20, 110);
     infoCtx.fillText(foodEating, 20, 140);
-
     infoCtx.fillText("Tiempo:", 20, 190); 
     const displayMinutes = Math.floor(secondsRemaining / 60);
     const displaySeconds = secondsRemaining % 60;
@@ -257,6 +278,8 @@ function updateScoreCanvas() {
     infoCtx.drawImage(Control, 40,300, 161, 140);
     infoCtx.drawImage(ControlPaused, 20, 450, 40, 40);
     infoCtx.fillText("Pausar",80,480);
+    infoCtx.fillText("Para ganar debes ",20,540)
+    infoCtx.fillText("comer 353 Quesitos",20,590)
 }
 function scoreGameOver(){
     infoCtx.fillStyle = "black";

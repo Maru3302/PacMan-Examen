@@ -33,7 +33,7 @@ class Player {
         this.movement = direction;
     }
 
-    update(cw, ch, food, obstacles) {
+    update(cw, ch, food,megaCheese, obstacles) {
         this.draw();
 
         switch (this.movement) {
@@ -62,6 +62,14 @@ class Player {
                 }
                 break;
         }
+
+        if (this.x < megaCheese.x + megaCheese.width && this.x + this.width > target.x && this.y < megaCheese.y + MegaFomegaCheeseod.height && this.y + this.height > megaCheese.y) {
+            do {
+                score += 5;
+                megaCheese.updatePosition(cw, ch);
+            } while (megaCheese.checkCollisionWithObstacles(obstacles));
+        }
+
 
         if (this.x < food.x + food.width && this.x + this.width > food.x && this.y < food.y + food.height && this.y + this.height > food.y) {
             do {

@@ -48,19 +48,24 @@
     <audio id="rat">
         <source src="./sounds/Win-rat.mp3" type="audio/mpeg">
     </audio>
+    <audio id="eat">
+        <source src="./sounds/Eating-Rat.mp3" type="audio/mpeg">
+    </audio>
    
     <script src="./Functions.js"></script>
     <script src="./Player.js"></script>
     <script src="./Food.js"></script>
     <script src="./Obstacle.js"></script>
     <script src="./Enemy.js"></script>
+    <script src ="./MegaFood.js"></script>
     
 </body>
 <script>
     
     let backgroundMusic = document.getElementById("background-music");
     let cat = document.getElementById("phantom-cat");
-
+    let Eat = document.getElementById("eat");
+    
     cat.pause();
     cat.currentTime = 0;
     backgroundMusic.pause();
@@ -105,7 +110,17 @@
     
     let Cheese = new Image();
     Cheese.src = "src/Cheese-point.png"; 
-
+    let Gouda = new Image();
+    Gouda.src = "src/Gouda-cheese.png";
+    let Chedar = new Image();
+    Chedar.src = "src/Chedar-cheese.png";
+    let Mozzarella = new Image();
+    Mozzarella.src = "src/Mozzarella-cheese.png";
+    let Gruyere = new Image();
+    Gruyere.src = "src/Gruyere-cheese.png";
+    
+    const megaCheese = new MegaFood(ctx, 500, 45, score);
+    
     const foods = [];
     const foodSpacing = 5
     const foodWidth = 15;
@@ -201,12 +216,11 @@
                 foodOverlapsPlayer = true;
             }
             
-            if (!foodOverlapsObstacle && !foodOverlapsPlayer) {
+            if (!foodOverlapsObstacle || !foodOverlapsPlayer) {
                 foods.push(new Food(ctx, x, y, foodWidth, foodHeight));
             }
         }
     }
-     
     startTimer();
     update();
 
