@@ -278,8 +278,8 @@ function updateScoreCanvas() {
     infoCtx.drawImage(Control, 40,300, 161, 140);
     infoCtx.drawImage(ControlPaused, 20, 450, 40, 40);
     infoCtx.fillText("Pausar",80,480);
-    infoCtx.fillText("Para ganar debes ",20,540)
-    infoCtx.fillText("comer 353 Quesitos",20,590)
+    infoCtx.fillText("Para ganar debes ",20,540);
+    infoCtx.fillText("comer "+ (353 - foodEating) +" Quesitos",20,590);
 }
 function scoreGameOver(){
     infoCtx.fillStyle = "black";
