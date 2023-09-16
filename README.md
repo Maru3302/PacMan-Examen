@@ -22,6 +22,11 @@ Contribuir
 Si deseas contribuir a este proyecto, ¡estamos abiertos a tus sugerencias y mejoras! Puedes realizar una 
 solicitud de extracción (pull request) con tus cambios y los revisaremos.
 
+Sobre el juego:
+
+Utiliza las flechas o teclas (awsd) para moverte por el mapa, cuidado con los quesos fuertes(algunos son falsos y NO 
+te otorgaran los puntos para arriesgarte), ganas al consumir 353 quesitos distribuidos por el mapa. Suerte :D
+
 Autores
 Manuel Alejandro Amaya Ortega - Desarrollador principal
 
